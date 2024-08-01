@@ -1,0 +1,15 @@
+
+catalog_service/node_modules
+catalog_service/.env
+catalog_service/build
+catalog_service/dist
+
+
+order_service/node_modules
+order_service/.env
+
+
+db/db-data
+
+
+.DS_Store

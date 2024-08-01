@@ -1,0 +1,9 @@
+POST http://localhost:8000/products
+Content-Type: application/json
+
+{
+  "name": "iMac",
+  "description": "Apple iMac 27-inch with Retina 5K display",
+  "price": 1999.99,
+  "stock": 10
+}
