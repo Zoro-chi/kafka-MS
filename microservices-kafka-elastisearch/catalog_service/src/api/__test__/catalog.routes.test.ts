@@ -16,7 +16,7 @@ const mockRequest = () => {
 		price: +faker.commerce.price(),
 	};
 };
-
+//
 describe("Catalog Routes", () => {
 	describe("POST /products/id", () => {
 		test("should create a product successfully", async () => {

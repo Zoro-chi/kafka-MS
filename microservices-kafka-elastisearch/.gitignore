@@ -8,7 +8,7 @@ catalog_service/coverage
 
 order_service/node_modules
 order_service/.env
-
+order_service/coverage
 
 db/db-data
 
