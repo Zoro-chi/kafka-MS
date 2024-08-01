@@ -3,12 +3,12 @@ catalog_service/node_modules
 catalog_service/.env
 catalog_service/build
 catalog_service/dist
-catalog_service/coverage
+catalog_service/coverage/*
 
 
 order_service/node_modules
 order_service/.env
-order_service/coverage
+order_service/coverage/*
 
 db/db-data
 
