@@ -7,67 +7,108 @@ import {
 	CartRequestInput,
 	CartRequestSchema,
 } from "../dto/cartRequest.dto";
+import { RequestAuthourizer } from "./middleware";
 
 const router = express.Router();
 
 const repo = repository.CartRepository;
 
-const authMiddlewear = (req: Request, res: Response, next: NextFunction) => {
-	//Todo: Implement Auth Middlewear using JWT
-
-	const isValidUser = true;
-	if (!isValidUser) {
-		return res.status(403).json({ message: "Unauthorized" });
-	}
-	next();
-};
-
 router.post(
 	"/cart",
-	authMiddlewear,
-	async (req: Request, res: Response, _: NextFunction) => {
+	RequestAuthourizer,
+	async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			const user = req.user;
+
+			if (!user) {
+				next(new Error("User not found"));
+				return;
+			}
+
 			const err = validateRequest<CartRequestInput>(
 				req.body,
 				CartRequestSchema
 			);
 			if (err) return res.status(400).json({ err });
 
+			const input: CartRequestInput = req.body;
+
 			const response = await service.CreateCart(
-				req.body as CartRequestInput,
+				{ ...input, customerId: user.id },
 				repo
 			);
 			return res.status(200).json({ response });
 		} catch (error) {
-			return res.status(404).json({ error });
+			// return res.status(404).json({ error });
+			next(error);
 		}
 	}
 );
 
-router.get("/cart", async (req: Request, res: Response, _: NextFunction) => {
-	// Todo: customer id comes from parsed JWT token
-	const response = await service.GetCart(req.body.customerId, repo);
-	return res.status(200).json({ response });
-});
+router.get(
+	"/cart",
+	RequestAuthourizer,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const user = req.user;
+
+			if (!user) {
+				next(new Error("User not found"));
+				return;
+			}
+			const response = await service.GetCart(user.id, repo);
+			return res.status(200).json({ response });
+		} catch (error) {
+			next(error);
+		}
+	}
+);
 
 router.patch(
 	"/cart/:lineItemId",
-	async (req: Request, res: Response, _: NextFunction) => {
-		const lineItemId = req.params.lineItemId;
-		const response = await service.UpdateCart(
-			{ id: +lineItemId, qty: req.body.qty },
-			repo
-		);
-		return res.status(200).json({ message: response });
+	RequestAuthourizer,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const user = req.user;
+
+			if (!user) {
+				next(new Error("User not found"));
+				return;
+			}
+
+			const lineItemId = req.params.lineItemId;
+			const response = await service.UpdateCart(
+				{ id: +lineItemId, qty: req.body.qty, customerId: user.id },
+				repo
+			);
+			return res.status(200).json({ message: response });
+		} catch (error) {
+			next(error);
+		}
 	}
 );
 
 router.delete(
 	"/cart/:lineItemId",
-	async (req: Request, res: Response, _: NextFunction) => {
-		const lineItemId = req.params.lineItemId;
-		const response = await service.DeleteCart(+lineItemId, repo);
-		return res.status(200).json({ message: response });
+	RequestAuthourizer,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const user = req.user;
+
+			if (!user) {
+				next(new Error("User not found"));
+				return;
+			}
+
+			const lineItemId = req.params.lineItemId;
+			const response = await service.DeleteCart(
+				{ customerId: user.id, id: +lineItemId },
+				repo
+			);
+			return res.status(200).json({ message: response });
+		} catch (error) {
+			next(error);
+		}
 	}
 );
 

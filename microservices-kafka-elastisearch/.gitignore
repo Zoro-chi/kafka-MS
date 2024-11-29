@@ -12,5 +12,8 @@ order_service/coverage/*
 
 db/db-data
 
+user_service/node_modules
+user_service/.env
+
 
 .DS_Store

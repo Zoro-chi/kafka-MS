@@ -14,18 +14,18 @@ export const ExpressApp = async () => {
 	app.use(express.json());
 	app.use(httpLogger);
 
-	// 1st step: Connect producer and consumer
-	const producer = await MessageBroker.connectProducer<Producer>();
-	producer.on("producer.connect", () => console.log("Producer connected"));
+	// // 1st step: Connect producer and consumer
+	// const producer = await MessageBroker.connectProducer<Producer>();
+	// producer.on("producer.connect", () => console.log("Producer connected"));
 
-	const consumer = await MessageBroker.connectConsumer<Consumer>();
-	consumer.on("consumer.connect", () => console.log("Consumer connected"));
+	// const consumer = await MessageBroker.connectConsumer<Consumer>();
+	// consumer.on("consumer.connect", () => console.log("Consumer connected"));
 
-	// 2nd step: subscribe to topic or publish message
-	await MessageBroker.subscribe((message) => {
-		console.log("consumer recieved message");
-		console.log("message recieved", message);
-	}, "OrderEvents");
+	// // 2nd step: subscribe to topic or publish message
+	// await MessageBroker.subscribe((message) => {
+	// 	console.log("consumer recieved message");
+	// 	console.log("message recieved", message);
+	// }, "OrderEvents");
 
 	// ROUTES
 	app.use(orderRoutes);
