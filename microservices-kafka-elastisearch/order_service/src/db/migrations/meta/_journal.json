@@ -15,6 +15,13 @@
       "when": 1722527195613,
       "tag": "0001_tense_prima",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1732906174199,
+      "tag": "0002_hard_thunderball",
+      "breakpoints": true
     }
   ]
 }

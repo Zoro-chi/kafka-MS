@@ -1,49 +1,80 @@
 import express, { NextFunction, Request, Response } from "express";
+
 import { MessageBroker } from "../utils/broker";
-import { OrderEvent } from "../types";
+import { OrderEvent, OrderStatus } from "../types";
+import { RequestAuthourizer } from "./middleware";
+import * as service from "../service/order.service";
+import { OrderRepository } from "../repository/order.repository";
+import { CartRepository } from "../repository/cart.repository";
 
 const router = express.Router();
 
-router.post("/order", async (req: Request, res: Response, _: NextFunction) => {
-	// Order create logic
+const orderRepo = OrderRepository;
+const cartRepo = CartRepository;
 
-	// 3rd step: Publish message
-	await MessageBroker.publish({
-		topic: "OrderEvents",
-		headers: { token: req.headers.authorization },
-		event: OrderEvent.CREATE_ORDER,
-		message: {
-			orderId: 1,
-			items: [
-				{
-					productId: 1,
-					quantity: 1,
-				},
-				{
-					productId: 2,
-					quantity: 2,
-				},
-			],
-		},
-	});
-	return res.status(200).json({ message: "order route is working" });
-});
-
-router.get("/order", async (req: Request, res: Response, _: NextFunction) => {
-	return res.status(200).json({ message: "order route is working" });
-});
+router.post(
+	"/orders",
+	RequestAuthourizer,
+	async (req: Request, res: Response, next: NextFunction) => {
+		const user = req.user;
+		if (!user) {
+			next(new Error("User not found"));
+			return;
+		}
+		const response = await service.CreateOrder(user.id, orderRepo, cartRepo);
+		return res.status(200).json(response);
+	}
+);
 
 router.get(
-	"/order/:id",
-	async (req: Request, res: Response, _: NextFunction) => {
-		return res.status(200).json({ message: "order route is working" });
+	"/orders",
+	async (req: Request, res: Response, next: NextFunction) => {
+		const user = req.user;
+		if (!user) {
+			next(new Error("User not found"));
+			return;
+		}
+		const response = await service.GetOrders(user.id, orderRepo);
+		return res.status(200).json(response);
+	}
+);
+
+router.get(
+	"/orders/:id",
+	async (req: Request, res: Response, next: NextFunction) => {
+		const user = req.user;
+		if (!user) {
+			next(new Error("User not found"));
+			return;
+		}
+		const response = await service.GetOrder(user.id, orderRepo);
+		return res.status(200).json(response);
+	}
+);
+
+// This is only going to call from microservice not user
+router.patch(
+	"/orders/:id",
+	async (req: Request, res: Response, next: NextFunction) => {
+		// Security check for microservice calls only
+		const orderId = parseInt(req.params.id);
+		const status = req.body.status as OrderStatus;
+		const response = await service.UpdateOrder(orderId, status, orderRepo);
+		return res.status(200).json(response);
 	}
 );
 
 router.delete(
-	"/order/:id",
-	async (req: Request, res: Response, _: NextFunction) => {
-		return res.status(200).json({ message: "order route is working" });
+	"/orders/:id",
+	async (req: Request, res: Response, next: NextFunction) => {
+		const user = req.user;
+		if (!user) {
+			next(new Error("User not found"));
+			return;
+		}
+		const orderId = parseInt(req.params.id);
+		const response = await service.DeleteOrder(orderId, orderRepo);
+		return res.status(200).json(response);
 	}
 );
 
